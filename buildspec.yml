@@ -1,0 +1,32 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - sudo apt-get update && sudo apt-get install -y zip gzip tar
+      - sudo apt-get install openjdk-7-jdk -y
+      - sudo apt-get install maven -y
+      - export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+
+  pre_build:
+    commands:
+      - echo build started on `date`
+      - mvn -version
+      - java -version
+      - echo $JAVA_HOME
+  build:
+    commands:
+      - mvn clean package
+  post_build:
+    commands:
+      - ls -l
+      - cd target
+      - ls -l
+      - aws s3 cp demo-1.0.2.jar s3://my-lambda-jar-artifacts/demo-1.0.2.jar
+      - echo build completed on `date`
+      - pwd
+artifacts:
+  files:
+    - target/demo-1.0.2.jar
+    - infrastructure/lambda.yml
+  discard-paths: yes
